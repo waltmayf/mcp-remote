@@ -29,7 +29,8 @@
     "check": "prettier --check . && tsc",
     "lint-fix": "prettier --check . --write",
     "test:unit": "vitest run",
-    "test:unit:watch": "vitest"
+    "test:unit:watch": "vitest",
+    "prepare": "pnpm build"
   },
   "dependencies": {
     "express": "^4.21.2",
@@ -56,7 +57,7 @@
     "format": [
       "esm"
     ],
-    "dts": true,
+    "dts": false,
     "clean": true,
     "outDir": "dist",
     "external": []
