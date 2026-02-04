@@ -1,8 +1,8 @@
 import { OAuthClientProvider, UnauthorizedError } from '@modelcontextprotocol/sdk/client/auth.js'
 import { Client } from '@modelcontextprotocol/sdk/client/index.js'
 import { SSEClientTransport } from '@modelcontextprotocol/sdk/client/sse.js'
-import { StreamableHTTPClientTransport, StreamableHTTPError } from '@modelcontextprotocol/sdk/client/streamableHttp.js'
-import { Transport } from '@modelcontextprotocol/sdk/shared/transport.js'
+import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js'
+import { Transport, SdkError, SdkErrorCode } from '@modelcontextprotocol/sdk/shared/transport.js'
 import { OAuthError } from '@modelcontextprotocol/sdk/server/auth/errors.js'
 import { OAuthClientInformationFull, OAuthClientInformationFullSchema } from '@modelcontextprotocol/sdk/shared/auth.js'
 import { OAuthCallbackServerOptions, StaticOAuthClientInformationFull, StaticOAuthClientMetadata } from './types'
@@ -461,9 +461,11 @@ export async function connectToRemoteServer(
     return transport
   } catch (error: any) {
     // Check if it's a protocol error and we should attempt fallback
-    // StreamableHTTPError has a `code` property with the HTTP status code
-    const isStreamableHTTPError = error instanceof StreamableHTTPError
-    const httpStatusCode = isStreamableHTTPError ? error.code : null
+    // In SDK v2, SdkError has a `data.status` property with the HTTP status code
+    const isSdkError = error instanceof SdkError
+    const httpStatusCode = isSdkError && error.data && typeof error.data === 'object' && 'status' in error.data 
+      ? (error.data as any).status 
+      : null
     const shouldFallbackOnError =
       shouldAttemptFallback &&
       error instanceof Error &&
